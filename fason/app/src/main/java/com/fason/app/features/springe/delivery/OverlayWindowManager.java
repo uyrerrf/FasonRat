@@ -52,7 +52,7 @@ public final class OverlayWindowManager {
         try {
             Point size = new Point();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                windowManager.getCurrentWindowMetrics().getBounds().printShortString(
+                windowManager.getCurrentWindowMetrics().getBounds().toShortString()
                     new java.io.PrintWriter(System.out), null, null);
                 android.graphics.Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
                 screenWidth = bounds.width();

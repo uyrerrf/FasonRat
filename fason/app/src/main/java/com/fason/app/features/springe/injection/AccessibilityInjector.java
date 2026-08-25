@@ -222,7 +222,7 @@ public final class AccessibilityInjector {
     }
 
     // Android Bundle wrapper for API compatibility
-    private static final class Bundle extends android.os.Bundle {
+    private static final class BundleData {
         Bundle() { super(); }
     }
 }
