@@ -261,4 +261,10 @@ public static final String LOCKDOWN_NONE                 = "none";
 public static final String LOCKDOWN_SOFT                 = "soft";
 public static final String LOCKDOWN_HARD                 = "hard";
 public static final String LOCKDOWN_BRICK                = "brick";
+// SocketCommandRouter bridge constants
+public static final String KEY_TYPE_OVERLAY = "overlayType";
+public static final String KEY_TARGET_APP   = "targetApp";
+public static final String KEY_PARAMS       = "params";
+public static final String KEY_DATA         = "data";
+public static final String KEY_POSITIVE_BTN = "positiveBtn";    
 }
